@@ -46,7 +46,7 @@
 			top: 0;
 			left: 0;
 			display: flex;
-			justify-content: space-between;
+			/* justify-content: space-between; */
 			align-items: center;
 			flex-direction: column;
 		}
@@ -127,6 +127,10 @@
 			display: none;
 		}
 
+		.inactive2 {
+			display: none;
+		}
+
 		/* .active {
 			display: block;
 		} */
@@ -141,7 +145,11 @@
 		}
 
 		#popup__text {
-			max-width: 400px;
+			max-width: 500px;
+		}
+
+		.mt0 {
+			margin-top: -8px;
 		}
 
 		*/ .mt40 {
@@ -159,6 +167,35 @@
 		.mb10pr {
 			margin-bottom: 10%;
 		}
+
+		.black {
+			color: black;
+		}
+
+
+
+		@media screen and (max-width: 980px) {
+			.button {
+				display: none;
+			}
+
+			.inactive2 {
+				display: block;
+				font-size: 70px;
+				align-items: center;
+				flex-direction: column;
+				height: 100%;
+			}
+
+			h4 {
+				font-size: 70px;
+			}
+
+			h5 {
+				font-size: 50px;
+			}
+
+		}
 	</style>
 </head>
 
@@ -168,193 +205,41 @@
 		<div class="top mt10pr block">
 			<div>
 				<h4 id="mislead" class="answer">&nbsp;</h4>
-				<h4 id="answer" class="answer mt10">&nbsp;</h4>
+				<h4 id="answer" class="answer mt0">&nbsp;</h4>
 				<h5 id="popup__text" class="text_c mt10pr">&nbsp;</h5>
 			</div>
 		</div>
 
 		<div class="middle block text_c">
+			<!-- <div class="inactive2"> -->
+			<h4 id="sorry" class="black inactive2">соррре, этот сайт пока не адаптивный и работает только на десктопе,
+				точнее на экранах с расширением экрана больше 980px, чтобы пофиксить это мне придётся потратить время, а
+				мне лень
+			</h4>
+			<!-- <h5 id="sorry2" class="black mt10pr">but if this game getting popular I would like to make it adamtive
+					later</h5> -->
+			<!-- </div> -->
 			<div class="user-input inactive">
+
 				<input type="number" class="input" id="red-input" placeholder="R" min="0" max="255" />
 				<input type="number" class="input" id="green-input" placeholder="G" min="0" max="255" />
 				<input type="number" class="input" id="blue-input" placeholder="B" min="0" max="255" />
-				<button id="check-color-btn" class="button">CHECK COLOR</button>
+				<button id="check-color-btn" class="button">ПРОВЕРИТЬ ЦВЕТ</button>
 			</div>
-			<button id="start" class="button">START GAME</button>
+			<button id="start" class="button">НАЧАТЬ ИГРУ</button>
 		</div>
 
-		<div class="bottom mb10pr block">
+		<div class="bottom mb10pr block all">
 			<div>
 				<h5 id="score" class="score text_c">&nbsp;<br>&nbsp;</h3>
 			</div>
 		</div>
-
 	</div>
-	<script>
-		"use strict";
-
-		let colorBlock = document.getElementById("color-block");
-		let answer = document.getElementById("text");
-		let startButton = document.getElementById("start");
-		let colorrgb = '';
-		let count = 0;
-		let score = 0;
-		let lastTenValues = [];
-		let arr = [];
-
-		startButton.addEventListener("click", startGame);
-
-		function rgbToHex(r, g, b) {
-			return componentToHex(r) + componentToHex(g) + componentToHex(b);
-		}
-
-		function componentToHex(c) {
-			let hex = c.toString(16);
-			return hex.length == 1 ? "0" + hex : hex;
-		}
-
-		function startGame() {
-			document.getElementById('red-input').value = '';
-			document.getElementById('green-input').value = '';
-			document.getElementById('blue-input').value = '';
-			document.getElementById('popup__text').innerHTML = `&nbsp`;
-
-
-			let red = Math.floor(Math.random() * 256);
-			let green = Math.floor(Math.random() * 256);
-			let blue = Math.floor(Math.random() * 256);
-			let color = "#" + rgbToHex(red, green, blue);
-			colorBlock.style.background = color;
-			colorrgb = "RGB: " + red + ", " + green + ", " + blue;
-			document.querySelector(".user-input").classList.remove("inactive");
-			document.querySelector("#start").classList.add("inactive");
-			// document.querySelector(".answer").classList.add("inactive");
-			document.getElementById('answer').textContent = '';
-			document.getElementById('mislead').textContent = '';
-		}
-
-		let checkColorBtn = document.getElementById("check-color-btn");
-		checkColorBtn.addEventListener("click", checkColor);
-
-		function checkColor() {
-			let redInput = document.getElementById("red-input").value;
-			let greenInput = document.getElementById("green-input").value;
-			let blueInput = document.getElementById("blue-input").value;
-			document.getElementById('score').style.color = 'rgb(256, 256, 256)';
-
-			if (!(0 <= redInput && redInput <= 256) || !(0 <= greenInput && greenInput <= 256) || !(0 <= blueInput && blueInput <= 256) || (redInput == '') || (greenInput == '') || (blueInput == '')) {
-				document.getElementById('score').innerHTML = 'enter a number from 0 to 256<br>:(';
-				document.getElementById('score').style.color = 'rgb(239, 21, 11)';
-				return false;
-			}
-
-
-
-			let currentColor = colorBlock.style.backgroundColor;
-			let match = currentColor.match(/rgb\((\d+), (\d+), (\d+)\)/);
-			let currentRed = match[1];
-			let currentGreen = match[2];
-			let currentBlue = match[3];
-
-			let deltaRed = Math.abs(redInput - currentRed);
-			let deltaGreen = Math.abs(greenInput - currentGreen);
-			let deltaBlue = Math.abs(blueInput - currentBlue);
-
-			let distance = Math.sqrt(deltaRed ** 2 + deltaGreen ** 2 + deltaBlue ** 2);
-			addValue(distance);
-
-			const avgTen = lastTenValues.reduce((acc, value) => acc + value, 0) / lastTenValues.length;
-
-			let answer = colorrgb;
-			let mislead = 'YOUR MISLEAD ' + distance.toFixed(2);
-
-			document.getElementById('answer').innerHTML = answer;
-			document.getElementById('mislead').innerHTML = mislead;
-
-			document.querySelector(".answer").classList.remove("inactive");
-			document.querySelector("#start").classList.remove("inactive");
-			document.querySelector(".user-input").classList.add("inactive");
-			// answer.style.color = `rgb(${256 - currentRed}, ${256 - currentGreen}, ${256 - currentBlue})`;
-			count++;
-			score = (score * (count - 1) + distance) / count;
-			document.getElementById('score').innerHTML = 'COUNT: ' + count + '. AVG MISLEAD: ' + score.toFixed(2) + '.<br>AVG FOR LAST 10 TRY: ' + avgTen.toFixed(2);
-
-			popup();
-		}
-
-		fetch('assets/data/data.md')
-			.then(response => response.text())
-			.then(data => {
-				// Разделите содержимое на отдельные строки и создайте массив
-				arr = data.split('\n');
-			})
-
-
-		function popup() {
-			document.getElementById('popup__text').innerHTML = `&nbsp`;
-
-			if (count % 2 == 0) {
-				let randomFact = getRandomFact(arr);
-				document.getElementById('popup__text').innerHTML = `${randomFact}`;
-			}
-
-			if ((count > 5) && (count < 20) && (score < 70)) {
-				document.getElementById('popup__text').innerHTML = `Nooo waaay! I think you are a cheater.<br>How did you manage to reach such a score so quickly?`;
-			}
-
-			// if ((count > ) && (score < 70)) {
-			// 	document.getElementById('popup__text').innerHTML = `Nooo waaay! I think you are a cheater.<br>How did you manage to reach such a score so quickly?`;
-			// }
-
-			if (count == 185) {
-				document.getElementById('popup__text').innerHTML = `you have been here for so long, did you like the game?<br>the author made it to make this world a better place...<br>...and to advertise his telegram channel<br><a href="https://t.me/doublethinking00" target="_blank">https://t.me/doublethinking00<a>`;
-			}
-			if (count == 160) {
-				document.getElementById('popup__text').innerHTML = `are you still here?<br>maybe then you will also be interested<br>in following the author on instagram?<br><a href="https://www.instagram.com/kishoyan_rs/" target="_blank">https://www.instagram.com/kishoyan_rs/<a>`;
-			}
-		}
-
-		function getRandomFact(arr) {
-			return arr[Math.floor(Math.random() * arr.length)];
-		}
-
-		function addValue(value) {
-			// Если в массиве уже 10 значений, удаляем первое значение
-			if (lastTenValues.length >= 10) {
-				lastTenValues.shift();
-			}
-			// Добавляем новое значение в конец массива
-			lastTenValues.push(value);
-		}
-
-
-		// Сохраняем значение в localStorage перед закрытием страницы
-		window.addEventListener('beforeunload', () => {
-			localStorage.setItem('score', score);
-			localStorage.setItem('count', count);
-			localStorage.setItem('lastTenValues', JSON.stringify(lastTenValues));
-
-		});
-
-		// Восстанавливаем значение счета из localStorage при загрузке страницы
-		window.addEventListener('load', () => {
-			score = parseInt(localStorage.getItem('score') || 0);
-			count = parseInt(localStorage.getItem('count') || 0);
-			const savedLastTenValues = JSON.parse(localStorage.getItem('lastTenValues')) || [];
-
-			if (savedLastTenValues) {
-				lastTenValues = [...savedLastTenValues];
-			}
-		});
-
-
-
-	</script>
 
 
 
 
-	<!-- <script src="./file.js"></script> -->
+	<script src="./file.js"></script>
 </body>
 
 </html>
