@@ -1,22 +1,360 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 	<title>Цветовое бинго</title>
 	<style>
-		#color-block {
+		* {
+			margin: 0;
+			padding: 0;
+			box-sizing: border-box;
+
+		}
+
+		@font-face {
+			font-family: 'IBMPlexSansCondensed-Medium';
+			src: url('assets/fonts/IBMPlexSansCondensed-Medium.ttf') format('truetype');
+			font-weight: normal;
+			font-style: medium;
+		}
+
+		@font-face {
+			font-family: 'IBMPlexSansCondensed-Light';
+			src: url('assets/fonts/IBMPlexSansCondensed-light.ttf') format('truetype');
+			font-weight: normal;
+			font-style: medium;
+		}
+
+		body {
+			font-family: 'IBMPlexSansCondensed-Medium', sans-serif;
+		}
+
+		h4 {
+			font-size: 32px;
+			color: white;
+		}
+
+		h5 {
+			font-size: 16px;
+			color: white;
+		}
+
+		.color-block {
 			width: 100%;
 			height: 100%;
 			position: absolute;
 			top: 0;
 			left: 0;
 			display: flex;
-			justify-content: center;
+			justify-content: space-between;
 			align-items: center;
+			flex-direction: column;
+		}
+
+		.line {
+			width: 100%;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.block {
+			height: 33%;
+
+		}
+
+		.top {
+			/* font-family: 'IBMPlexSansCondensed-Light', sans-serif; */
+			font-weight: 200;
+		}
+
+		.middle {
+			display: flex;
+			align-items: center;
+
+		}
+
+		.bottom {
+			display: flex;
+			align-items: flex-end;
+
+		}
+
+		.text_c {
+			text-align: center;
+		}
+
+		.user-input {}
+
+		.input {
+			min-width: 60px;
+			height: 35px;
+			margin-right: 5px;
+			border-radius: 8px;
+			padding-left: 10px;
+			padding-right: 10px;
+			border-radius: 65.5px;
+			border: 1px solid #0D0D0D;
+			outline: none;
+			font-family: 'IBMPlexSansCondensed-Medium', sans-serif;
+			/* text-align: center; */
+		}
+
+		input::-webkit-outer-spin-button,
+		input::-webkit-inner-spin-button {
+			/* display: none; <- Crashes Chrome on hover */
+			-webkit-appearance: none;
+			margin: 0;
+			/* <-- Apparently some margin are still there even though it's hidden */
+		}
+
+		.button {
+			height: 35px;
+			border-radius: 8px;
+			padding-top: 6px;
+			padding-bottom: 6px;
+			padding-left: 20px;
+			padding-right: 20px;
+			border-radius: 65.5px;
+			cursor: pointer;
+			border: none;
+			background-color: white;
+			border: 1px solid #0D0D0D;
+			color: black;
+			font-family: 'IBMPlexSansCondensed-Medium', sans-serif;
+		}
+
+		.inactive {
+			display: none;
+		}
+
+		/* .active {
+			display: block;
+		} */
+
+		.answer {
+			text-align: center;
+		}
+
+		.score {
+			padding: 10px, 10px, 10px, 10px;
+
+		}
+
+		#popup__text {
+			max-width: 400px;
+		}
+
+		*/ .mt40 {
+			margin-top: 40px;
+		}
+
+		.mt10pr {
+			margin-top: 10%;
+		}
+
+		.mb40 {
+			margin-bottom: 40px;
+		}
+
+		.mb10pr {
+			margin-bottom: 10%;
 		}
 	</style>
 </head>
+
 <body>
-	<div id="color-block"></div>
-    <script src="./file.js"></script>
+	<div id="color-block" class="color-block">
+
+		<div class="top mt10pr block">
+			<div>
+				<h4 id="mislead" class="answer">&nbsp;</h4>
+				<h4 id="answer" class="answer mt10">&nbsp;</h4>
+				<h5 id="popup__text" class="text_c mt10pr">&nbsp;</h5>
+			</div>
+		</div>
+
+		<div class="middle block text_c">
+			<div class="user-input inactive">
+				<input type="number" class="input" id="red-input" placeholder="R" min="0" max="255" />
+				<input type="number" class="input" id="green-input" placeholder="G" min="0" max="255" />
+				<input type="number" class="input" id="blue-input" placeholder="B" min="0" max="255" />
+				<button id="check-color-btn" class="button">CHECK COLOR</button>
+			</div>
+			<button id="start" class="button">START GAME</button>
+		</div>
+
+		<div class="bottom mb10pr block">
+			<div>
+				<h5 id="score" class="score text_c">&nbsp;<br>&nbsp;</h3>
+			</div>
+		</div>
+
+	</div>
+	<script>
+		"use strict";
+
+		let colorBlock = document.getElementById("color-block");
+		let answer = document.getElementById("text");
+		let startButton = document.getElementById("start");
+		let colorrgb = '';
+		let count = 0;
+		let score = 0;
+		let lastTenValues = [];
+		let arr = [];
+
+		startButton.addEventListener("click", startGame);
+
+		function rgbToHex(r, g, b) {
+			return componentToHex(r) + componentToHex(g) + componentToHex(b);
+		}
+
+		function componentToHex(c) {
+			let hex = c.toString(16);
+			return hex.length == 1 ? "0" + hex : hex;
+		}
+
+		function startGame() {
+			document.getElementById('red-input').value = '';
+			document.getElementById('green-input').value = '';
+			document.getElementById('blue-input').value = '';
+			document.getElementById('popup__text').innerHTML = `&nbsp`;
+
+
+			let red = Math.floor(Math.random() * 256);
+			let green = Math.floor(Math.random() * 256);
+			let blue = Math.floor(Math.random() * 256);
+			let color = "#" + rgbToHex(red, green, blue);
+			colorBlock.style.background = color;
+			colorrgb = "RGB: " + red + ", " + green + ", " + blue;
+			document.querySelector(".user-input").classList.remove("inactive");
+			document.querySelector("#start").classList.add("inactive");
+			// document.querySelector(".answer").classList.add("inactive");
+			document.getElementById('answer').textContent = '';
+			document.getElementById('mislead').textContent = '';
+		}
+
+		let checkColorBtn = document.getElementById("check-color-btn");
+		checkColorBtn.addEventListener("click", checkColor);
+
+		function checkColor() {
+			let redInput = document.getElementById("red-input").value;
+			let greenInput = document.getElementById("green-input").value;
+			let blueInput = document.getElementById("blue-input").value;
+			document.getElementById('score').style.color = 'rgb(256, 256, 256)';
+
+			if (!(0 <= redInput && redInput <= 256) || !(0 <= greenInput && greenInput <= 256) || !(0 <= blueInput && blueInput <= 256) || (redInput == '') || (greenInput == '') || (blueInput == '')) {
+				document.getElementById('score').innerHTML = 'enter a number from 0 to 256<br>:(';
+				document.getElementById('score').style.color = 'rgb(239, 21, 11)';
+				return false;
+			}
+
+
+
+			let currentColor = colorBlock.style.backgroundColor;
+			let match = currentColor.match(/rgb\((\d+), (\d+), (\d+)\)/);
+			let currentRed = match[1];
+			let currentGreen = match[2];
+			let currentBlue = match[3];
+
+			let deltaRed = Math.abs(redInput - currentRed);
+			let deltaGreen = Math.abs(greenInput - currentGreen);
+			let deltaBlue = Math.abs(blueInput - currentBlue);
+
+			let distance = Math.sqrt(deltaRed ** 2 + deltaGreen ** 2 + deltaBlue ** 2);
+			addValue(distance);
+
+			const avgTen = lastTenValues.reduce((acc, value) => acc + value, 0) / lastTenValues.length;
+
+			let answer = colorrgb;
+			let mislead = 'YOUR MISLEAD ' + distance.toFixed(2);
+
+			document.getElementById('answer').innerHTML = answer;
+			document.getElementById('mislead').innerHTML = mislead;
+
+			document.querySelector(".answer").classList.remove("inactive");
+			document.querySelector("#start").classList.remove("inactive");
+			document.querySelector(".user-input").classList.add("inactive");
+			// answer.style.color = `rgb(${256 - currentRed}, ${256 - currentGreen}, ${256 - currentBlue})`;
+			count++;
+			score = (score * (count - 1) + distance) / count;
+			document.getElementById('score').innerHTML = 'COUNT: ' + count + '. AVG MISLEAD: ' + score.toFixed(2) + '.<br>AVG FOR LAST 10 TRY: ' + avgTen.toFixed(2);
+
+			popup();
+		}
+
+		fetch('assets/data/data.md')
+			.then(response => response.text())
+			.then(data => {
+				// Разделите содержимое на отдельные строки и создайте массив
+				arr = data.split('\n');
+			})
+
+
+		function popup() {
+			document.getElementById('popup__text').innerHTML = `&nbsp`;
+
+			if (count % 2 == 0) {
+				let randomFact = getRandomFact(arr);
+				document.getElementById('popup__text').innerHTML = `${randomFact}`;
+			}
+
+			if ((count > 5) && (count < 20) && (score < 70)) {
+				document.getElementById('popup__text').innerHTML = `Nooo waaay! I think you are a cheater.<br>How did you manage to reach such a score so quickly?`;
+			}
+
+			// if ((count > ) && (score < 70)) {
+			// 	document.getElementById('popup__text').innerHTML = `Nooo waaay! I think you are a cheater.<br>How did you manage to reach such a score so quickly?`;
+			// }
+
+			if (count == 185) {
+				document.getElementById('popup__text').innerHTML = `you have been here for so long, did you like the game?<br>the author made it to make this world a better place...<br>...and to advertise his telegram channel<br><a href="https://t.me/doublethinking00" target="_blank">https://t.me/doublethinking00<a>`;
+			}
+			if (count == 160) {
+				document.getElementById('popup__text').innerHTML = `are you still here?<br>maybe then you will also be interested<br>in following the author on instagram?<br><a href="https://www.instagram.com/kishoyan_rs/" target="_blank">https://www.instagram.com/kishoyan_rs/<a>`;
+			}
+		}
+
+		function getRandomFact(arr) {
+			return arr[Math.floor(Math.random() * arr.length)];
+		}
+
+		function addValue(value) {
+			// Если в массиве уже 10 значений, удаляем первое значение
+			if (lastTenValues.length >= 10) {
+				lastTenValues.shift();
+			}
+			// Добавляем новое значение в конец массива
+			lastTenValues.push(value);
+		}
+
+
+		// Сохраняем значение в localStorage перед закрытием страницы
+		window.addEventListener('beforeunload', () => {
+			localStorage.setItem('score', score);
+			localStorage.setItem('count', count);
+			localStorage.setItem('lastTenValues', JSON.stringify(lastTenValues));
+
+		});
+
+		// Восстанавливаем значение счета из localStorage при загрузке страницы
+		window.addEventListener('load', () => {
+			score = parseInt(localStorage.getItem('score') || 0);
+			count = parseInt(localStorage.getItem('count') || 0);
+			const savedLastTenValues = JSON.parse(localStorage.getItem('lastTenValues')) || [];
+
+			if (savedLastTenValues) {
+				lastTenValues = [...savedLastTenValues];
+			}
+		});
+
+
+
+	</script>
+
+
+
+
+	<!-- <script src="./file.js"></script> -->
 </body>
+
 </html>

@@ -10,6 +10,7 @@ function changeColor() {
   let green = Math.floor(Math.random() * 256);
   let blue = Math.floor(Math.random() * 256);
   let color = "#" + rgbToHex(red, green, blue);
+  let colorrgb = "RGB: " + red + ", " + green + ", " + blue;
   colorBlock.style.backgroundColor = color;
 }
 
@@ -26,7 +27,8 @@ function stopColorChange() {
   clearInterval(intervalId);
   let color = colorBlock.style.backgroundColor;
   let hexColor = rgbToHexColor(color);
-  colorBlock.textContent = hexColor;
+  // colorBlock.textContent = hexColor;
+  colorBlock.textContent = colorrgb;
 }
 
 function rgbToHexColor(rgbColor) {
